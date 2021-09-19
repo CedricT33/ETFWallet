@@ -1,5 +1,5 @@
 // Constantes
-const VERSION = "01.00.000";
+const VERSION = "01.00.001";
 const CACHE_NAME_STATIC = "static-" + VERSION;
 const CACHE_NAME_DYNAMIC = "dynamic-" + VERSION;
 const urlsToCache = [ 
@@ -68,7 +68,6 @@ self.addEventListener("fetch", event => {
 // Activate SW
 self.addEventListener("activate", event => {
     console.log('[Service Worker] [2] Activation du Service Worker...');
-    setVersion();
     event.waitUntil(
         caches.keys().then((keyList) => {
             return Promise.all(keyList.map(key => {
