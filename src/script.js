@@ -32,7 +32,7 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.001";
+var version = "01.00.002";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
@@ -376,7 +376,7 @@ function supprimerDonneeStorage(index) {
             storage.splice(id, 1);
         }
     })
-    localStorage.setItem("achats", JSON.stringify(storage));
+    localStorage.setItem("achats_etfwallet", JSON.stringify(storage));
     recuperationLocalStorage();
     miseAJourPortefeuille();
     gestionAffichagePresentation();
@@ -409,14 +409,14 @@ function recupererObjetVignette(index) {
         storage = [];
     }
     storage.push(objetAchat);
-    localStorage.setItem("achats", JSON.stringify(storage));
+    localStorage.setItem("achats_etfwallet", JSON.stringify(storage));
 }
 
 /**
  * RECUPERE LE LOCAL STORAGE
  */
  function recuperationLocalStorage() {
-    storage = JSON.parse(localStorage.getItem("achats"));
+    storage = JSON.parse(localStorage.getItem("achats_etfwallet"));
 }
 
 
