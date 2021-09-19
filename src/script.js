@@ -20,7 +20,7 @@
                 API
 **********************************/
 /////////////////////
-var isBouchon = false;
+var isBouchon = true;
 /////////////////////
 
 var urlAPIBase = "https://eodhistoricaldata.com/api/real-time/";
@@ -32,7 +32,7 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.003";
+var version = "01.00.004";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
@@ -42,9 +42,9 @@ var totalAchats = 0;
 var totalETFs = 0;
 
 var miseAJour = {
-    date: "19/09/2021",
-    texte: "- Popin de mises à jour (nouveautées).\n" +
-            "(Version : " + version + ")"
+    date: "18/09/2021",
+    texte: "- Ajout stockage données après appel.\n" +
+           "(Version : " + version + ")"
 };
 
 var ETFs = {
@@ -860,11 +860,52 @@ function gestionAffichagePresentation() {
 }
 
 /**
- * APPEL API DE RECUPERATION DU COURS DES ETFs EN EURO
+ * APPEL D'API
+ * @param urlAPI
+ * @returns objet JSON type Promise
+ */
+ function appelAPI(urlAPI) {
+    var storageData = JSON.parse(localStorage.getItem("data_etfwallet"));
+    var objetData = {
+        date: Date.now(),
+        data: {}
+    }
+    return new Promise(function(resolve) {
+        var elmtAlert = document.getElementById("img-alert");
+        if (isBouchon) {
+            var bouchon = creationBouchon(urlAPI);
+            console.log("[APPEL BOUCHON]");
+            objetData.data = bouchon;
+            localStorage.setItem("data_etfwallet", JSON.stringify(objetData));
+            elmtAlert.classList.remove('hide');
+            resolve(bouchon);
+        }
+        else {
+            console.log("[APPEL API]");
+            ajaxGet(urlAPI, function (reponse) {
+                if (reponse.status >= 200 && reponse.status < 400) {
+                    objetData.data = JSON.parse(reponse.responseText);
+                    localStorage.setItem("data_etfwallet", JSON.stringify(objetData));
+                    elmtAlert.classList.add('hide');
+                    resolve(JSON.parse(reponse.responseText));
+                }
+                else {
+                    console.log("Error : ", reponse);
+                    elmtAlert.classList.remove('hide');
+                    resolve(storageData.data);
+                }
+            });
+        }
+    });
+}
+
+/**
+ * APPEL DE RECUPERATION DU COURS DES ETFs EN EURO
  * @param tableauETF
  * @returns objet JSON type Promise
  */
 function recuperationCoursETFs(tableauETF) {
+    var elmtAlert = document.getElementById("img-alert");
     var premierETF = tableauETF[0].toString() + ".PA";
     var autresETF = "";
     if (tableauETF.length > 1) {
@@ -875,20 +916,24 @@ function recuperationCoursETFs(tableauETF) {
     }
     return new Promise(function(resolve) {
         var urlAPI = urlAPIBase  + premierETF + "?api_token=" + apiKey + "&fmt=json" + autresETF;
+        var storageData = JSON.parse(localStorage.getItem("data_etfwallet"));
 
-        if (isBouchon) {
-            var bouchon = creationBouchon(urlAPI);
-            resolve(bouchon);
+        if (storageData) {
+            var delaiAppel = Date.now() - storageData.date;
+            var cinqMinutes = 5 * 60000;
+            if (delaiAppel < cinqMinutes) {
+                console.log("[STORAGE] delai d'appel inf à 5 min : ", delaiAppel);
+                elmtAlert.classList.remove('hide');
+                resolve(storageData.data);
+            }
+            else {
+                console.log("[APPEL] delai d'appel sup à 5 min : ", delaiAppel);
+                elmtAlert.classList.add('hide');
+                resolve(appelAPI(urlAPI));
+            }
         }
         else {
-            ajaxGet(urlAPI, function (reponse) {
-                if (reponse.status >= 200 && reponse.status < 400) {
-                    resolve(JSON.parse(reponse.responseText));
-                }
-                else {
-                    console.log("Error : ", reponse);
-                }
-            });
+            resolve(appelAPI(urlAPI));
         }
     });
 }

@@ -250,6 +250,23 @@ nav {
     left: 7px;
 }
 
+#img-alert {
+    font-family: 'fontawesome';
+    font-size: 30px;
+    -webkit-tap-highlight-color: transparent;
+    padding: 15px 20px;
+    cursor: pointer;
+    color: #262c28;
+}
+
+#img-alert.hide {
+    display: none;
+}
+
+#img-alert:before {
+    content: "\f071";
+}
+
 #ajout:after {
     content: "\f055";
     color: #5bb464;
