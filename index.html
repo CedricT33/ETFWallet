@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#262c28">
+        <title>ETF Wallet</title>
+        <link rel="stylesheet" href="src/style.css">
+        <link rel="stylesheet" href="src/highcharts.css">
+        <link rel="manifest" href="manifest.json">
+        <link rel="apple-touch-icon" href="./images/logo192.png">
+        <link rel="icon" type="image/png" href="./images/logo192.png">
+    </head>
+    <body>
+
+        <!----- CONTAINER PRINCIPAL ---------------------------->
+        <div id="container_principal">
+        
+            <!----- HAUT ------------------------>
+            <div id="container_haut">
+                <div id="deco" class="wallet"></div>
+                <!----- HEADER ----------->
+                <header>
+                    <a id="logo">ETF <span>wallet</span></a>
+                    <a id="img-params"></a>
+                </header>
+
+                <!----- PORTEFEUILLE ----->
+                <div id="portefeuille">
+                    <div id="total">0,00 €</div>
+                    <div id="gains">
+                        <div id="gains-total">0 €</div>
+                        <div id="gains-jour">(+ 0 €)</div>
+                    </div>
+                    <div id="pourcentage">
+                        <div id="pourcentage-total">0 %</div>
+                        <div id="pourcentage-jour">(+ 0 %)</div>
+                    </div>
+                </div>
+
+                <!----- GRAPH ------------>
+                <div id="graph_container" class="hide"></div>
+
+                <div id="bitcoin"></div>
+            </div>
+
+            <!----- BAS -------------------------->
+            <div id="container_bas">
+                <!----- NAVIGATION ------->
+                <nav>
+                    <div id="ajout" onclick="clickAjout()"></div>
+                    <div id="retour" class="hide" onclick="clickRetour()"></div>
+                    <div id="graph" onclick="clickGraph()"></div>
+                </nav>
+
+                <div id="titre_vignettes">Marchés</div>
+
+                <!--- VIGNETTES COURS --->
+                <div id="cours_container"></div>
+
+                <!--- VIGNETTES ACHAT --->
+                <div id="achats_container" class="hide"></div>
+
+                <!----- PRESENTATION ---->
+                <div id="fleche-presentation"></div>
+                <div id="presentation-container">
+                    <div id="texte-presentation">
+                        <strong>Bienvenue !</strong><br>
+                        Pour ajouter un achat <br> veuillez cliquer sur <br>
+                        le bouton <strong>+</strong>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!----- FORMULAIRE ACHAT ---------------------------->
+        <div id="ajout-container">
+            <header>
+                <div id="formulaire_retour" onclick="clickRetourFormulaire()"></div>
+                <div id="titre_formulaire">Achat <span>ETF</span></div>
+            </header>
+            <div id="formulaire_total">
+                <form id="formulaire-container">
+                    <input id="index">
+                    <select id="saisieETF" name="crypto">
+                        <option value="" disabled selected>ETF</option>
+                    </select>
+                    <input id="saisieQuantite" type="number" name="quantite" placeholder="Quantité" max="10">
+                    <input id="saisieCours" type="number" name="cours" placeholder="Cours (€)" max="17">
+                    <input id="saisieCommission" type="number" name="commission" placeholder="Commission (%)" max="10">
+                    <div id="total_container">
+                        <div>Total : </div> 
+                        <div id="form_total">0</div>
+                        <div>€</div>
+                    </div>
+                    <div id="date">
+                        <input id="saisieJour" type="number" name="jour" placeholder="Jour" max="2">
+                        <input id="saisieMois" type="number" name="mois" placeholder="Mois" max="2">
+                        <input id="saisieAnnee" type="number" name="annee" placeholder="Année" max="4">
+                    </div>
+                </form>
+                <div id="validation-container">
+                    <button type="button" id="btn-ok" onclick="clickOKFormulaire()">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!----- POPIN -------------------------------------->
+        <div id="popin-masque" onclick="detruirePopin()"></div>
+        <div id="popin">
+            <input id="index-popin">
+            <div id="popin-container">
+                <div id="popin-titre"></div>
+                <div id="popin-corps"></div>
+            </div>
+            <div id="validation-container-popin">
+                <button type="button" id="btn-popin" onclick="clickOKPopin()">OK</button>
+            </div>
+        </div>
+
+        <!----- SCRIPTS ------------------------------------>
+        <script src="src/index.js"></script>
+        <script src="src/ajax.js"></script>
+        <script src="src/highcharts.js"></script>
+        <script src="src/variable-pie.js"></script>
+        <script src="src/bouchon.js"></script>
+        <script src="src/script.js"></script> 
+    </body>
+</html>
