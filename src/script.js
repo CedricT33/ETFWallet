@@ -20,7 +20,7 @@
                 API
 **********************************/
 /////////////////////
-var isBouchon = true;
+var isBouchon = false;
 /////////////////////
 
 var urlAPIBase = "https://eodhistoricaldata.com/api/real-time/";
@@ -32,7 +32,7 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.004";
+var version = "01.00.005";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
