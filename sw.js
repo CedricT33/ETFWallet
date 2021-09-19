@@ -1,5 +1,5 @@
 // Constantes
-const VERSION = "01.00.002";
+const VERSION = "01.00.003";
 const CACHE_NAME_STATIC = "static-" + VERSION;
 const CACHE_NAME_DYNAMIC = "dynamic-" + VERSION;
 const urlsToCache = [ 
@@ -37,7 +37,6 @@ self.addEventListener("install", event => {
     );
 });
 
-/* TODO Mis en commentaire pour Tests -> erreurs de cross origins... a débuguer..
 // Listen for request
 self.addEventListener("fetch", event => {
     console.log('[Service Worker] Recherche... : ', event.request.url);
@@ -63,7 +62,7 @@ self.addEventListener("fetch", event => {
             }
         })
     );
-});*/
+});
 
 // Activate SW
 self.addEventListener("activate", event => {
