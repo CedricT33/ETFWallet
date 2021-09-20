@@ -32,7 +32,7 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.005";
+var version = "01.00.006";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
@@ -891,6 +891,7 @@ function gestionAffichagePresentation() {
                 }
                 else {
                     console.log("Error : ", reponse);
+                    console.log("[APPEL STORAGE]");
                     elmtAlert.classList.remove('hide');
                     resolve(storageData.data);
                 }
@@ -1007,7 +1008,6 @@ function onDocumentReady() {
     recuperationLocalStorage();
     gestionAffichagePresentation();
     miseAJourPortefeuille();
-    //setInterval(miseAJourPortefeuille, 15000);
     gestionMiseAJour();
 }
 
