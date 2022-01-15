@@ -33,7 +33,7 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.012";
+var version = "01.00.013";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
@@ -231,10 +231,10 @@ var ETFs = {
 /**
  * CONSTRUIT UNE VIGNETTE COURS
  */
-function constructionVignetteCoursHTML(etf_nom, etf_complet, cours) {
+function constructionVignetteCoursHTML(etf_nom, etf_complet, cours, coursEuro) {
     var achatTotalETF = objetTotalETF[etf_nom];
     var quantiteTotalETF = objetQuantiteETF[etf_nom];
-    var totalRentabiliteETF = ((cours * quantiteTotalETF) - achatTotalETF) / achatTotalETF;
+    var totalRentabiliteETF = ((coursEuro * quantiteTotalETF) - achatTotalETF) / achatTotalETF;
     var totalRentabiliteETFFormated = formatPrix(totalRentabiliteETF) + " %";
     var rentabiliteFinale = totalRentabiliteETF >= 0 ? "+" + totalRentabiliteETFFormated : totalRentabiliteETFFormated;
     var couleurRentabilite = totalRentabiliteETF >= 0 ? '' : ' negatif';
@@ -324,6 +324,7 @@ function ajoutVignettesHTMLCours(objetCoursETFs) {
     var etf_nom = '';
     var etf_complet = '';
     var cours = 0;
+    var coursEuro = 0;
 
     suppressionVignettesCours();
 
@@ -331,7 +332,8 @@ function ajoutVignettesHTMLCours(objetCoursETFs) {
         etf_nom = etf;
         etf_complet = ETFs[etf];
         cours = objetCoursETFs[etf].change_p;
-        constructionVignetteCoursHTML(etf_nom, etf_complet, cours);
+        coursEuro = objetCoursETFs[etf].close;
+        constructionVignetteCoursHTML(etf_nom, etf_complet, cours, coursEuro);
     }
 }
 
