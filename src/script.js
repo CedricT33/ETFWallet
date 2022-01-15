@@ -32,7 +32,7 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.007";
+var version = "01.00.008";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
@@ -151,7 +151,7 @@ var ETFs = {
  function triStorageParDate() {
     if (storage) {
         storage.forEach( (donnee) => {
-            var dateString = "" + donnee.jour + " " + donnee.mois + " " + donnee.annee;
+            var dateString = "" + donnee.annee + "-" + donnee.mois + "-" + donnee.jour;
             var date = Date.parse(dateString);
             donnee.date = date;
         })
