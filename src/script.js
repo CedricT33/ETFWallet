@@ -33,7 +33,7 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.009";
+var version = "01.00.010";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
@@ -231,6 +231,13 @@ var ETFs = {
  * CONSTRUIT UNE VIGNETTE COURS
  */
 function constructionVignetteCoursHTML(etf_nom, etf_complet, cours) {
+    var achatTotalETF = objetTotalETF[etf_nom];
+    var quantiteTotalETF = objetQuantiteETF[etf_nom];
+    var totalRentabiliteETF = ((cours * quantiteTotalETF) - achatTotalETF) / achatTotalETF;
+    var totalRentabiliteETFFormated = formatPrix(totalRentabiliteETF) + " %";
+    var rentabiliteFinale = totalRentabiliteETF >= 0 ? "+" + totalRentabiliteETFFormated : totalRentabiliteETFFormated;
+    var couleurRentabilite = totalRentabiliteETF >= 0 ? '' : ' negatif';
+
     var couleur = cours >= 0 ? '' : ' negatif';
     var pourcentage = formatPrix(cours) + " %";
     var elmtCoursConteneur = document.getElementById('cours_container');
@@ -239,12 +246,20 @@ function constructionVignetteCoursHTML(etf_nom, etf_complet, cours) {
     var elmtNoms = creerElement('div', 0, 'vignette_noms');
     var elmtAcronymeETF = creerElement('div', 0, 'acronyme_etf', etf_nom);
     var elmtNomETF = creerElement('div', 0, 'nom_etf', etf_complet);
-    var elmtPrixETF = creerElement('div', 0, 'vignette_prix' + couleur, pourcentage);
+    var elmtPrix = creerElement('div', 0, 'vignette_prix');
+    var elmtPrixETF = creerElement('div', 0, 'vignette_prix_ETF' + couleur, pourcentage);
+    var elmtPrixTotal = creerElement('div', 0, 'vignette_prix_total');
+    var elmtMotTotal = creerElement('div', 0, 'vignette_mot_total', "TOTAL : ");
+    var elmtPrixTotalETF = creerElement('div', 0, 'vignette_prix_total_ETF' + couleurRentabilite, rentabiliteFinale);
     
     elmtNoms.appendChild(elmtAcronymeETF);
     elmtNoms.appendChild(elmtNomETF);
+    elmtPrixTotal.appendChild(elmtMotTotal);
+    elmtPrixTotal.appendChild(elmtPrixTotalETF);
+    elmtPrix.appendChild(elmtPrixETF);
+    elmtPrix.appendChild(elmtPrixTotal);
     elmtInfos.appendChild(elmtNoms);
-    elmtInfos.appendChild(elmtPrixETF);
+    elmtInfos.appendChild(elmtPrix);
     elmtVignetteConteneur.appendChild(elmtInfos);
     elmtCoursConteneur.appendChild(elmtVignetteConteneur);
 }
@@ -257,7 +272,7 @@ function constructionVignetteCoursHTML(etf_nom, etf_complet, cours) {
 
     var rentabilite = ((objetCoursETFJSON[etf].close - (total/quantite)) / (total/quantite)) * 100;
     var rentabiliteFormated = formatPrix(rentabilite) + " %";
-    var rentabiliteFinale = rentabilite >= 0 ? "+ " + rentabiliteFormated : rentabiliteFormated;
+    var rentabiliteFinale = rentabilite >= 0 ? "+" + rentabiliteFormated : rentabiliteFormated;
     var couleur = rentabilite >= 0 ? '' : ' negatif';
 
     var elmtAchatsConteneur = document.getElementById('achats_container');
