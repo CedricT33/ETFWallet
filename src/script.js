@@ -32,7 +32,7 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.006";
+var version = "01.00.007";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
@@ -42,8 +42,8 @@ var totalAchats = 0;
 var totalETFs = 0;
 
 var miseAJour = {
-    date: "18/09/2021",
-    texte: "- Ajout stockage données après appel.\n" +
+    date: "15/01/2022",
+    texte: "- Classement des achats par date.\n" +
            "(Version : " + version + ")"
 };
 
@@ -143,6 +143,20 @@ var ETFs = {
         }
     };
     window.requestAnimationFrame(step);
+}
+
+/**
+ * TRI DU STORAGE PAR DATE (CROISSANT)
+ */
+ function triStorageParDate() {
+    if (storage) {
+        storage.forEach( (donnee) => {
+            var dateString = "" + donnee.jour + " " + donnee.mois + " " + donnee.annee;
+            var date = Date.parse(dateString);
+            donnee.date = date;
+        })
+    }
+    storage.sort((a,b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0));
 }
 
 
@@ -308,6 +322,7 @@ function ajoutVignettesHTMLCours(objetCoursETFs) {
  */
  function ajoutVignettesHTMLAchats() {
     suppressionVignettesAchats();
+    triStorageParDate();
     if (storage) {
         storage.forEach( (achat) => {
             var date = "" + achat.jour + "/" + achat.mois + "/" + achat.annee;
