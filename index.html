@@ -22,7 +22,10 @@
                 <!----- HEADER ----------->
                 <header>
                     <a id="logo">ETF <span>wallet</span></a>
-                    <a id="img-alert" class="hide"></a>
+                    <div>
+                        <a id="img-alert" class="hide"></a>
+                        <a id="img-params" onclick="clickParams()"></a>
+                    </div>
                 </header>
 
                 <!----- PORTEFEUILLE ----->
@@ -71,6 +74,20 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+        <!----- PARAMETRES ----------------------------------->
+        <div id="params-container">
+            <header>
+                <div id="parametre_retour" onclick="clickRetourParametres()"></div>
+                <div id="titre_parametres">Paramètres</div>
+            </header>
+            <div id="params_total">
+                <input type="file" id="input-file" onChange="readFichier(this)">
+                <button type="button" id="btn-save" onclick="sauvegardeJSON()">SAVE</button>
+                <button type="button" id="btn-load" onclick="rechercheFichier()">LOAD</button>
+                <button type="button" id="btn-reset" onclick="clickReset()">RESET</button>
             </div>
         </div>
 

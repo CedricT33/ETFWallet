@@ -12,6 +12,7 @@
 **** INTERACTIONS
 **** POPIN
 **** FORMULAIRE
+**** FICHIER
 **** FONCTIONS
 **** START
 
@@ -32,7 +33,7 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.008";
+var version = "01.00.009";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
@@ -44,6 +45,7 @@ var totalETFs = 0;
 var miseAJour = {
     date: "15/01/2022",
     texte: "- Classement des achats par date.\n" +
+           "- Ajout de l'enregistrement de données sur device.\n" +
            "(Version : " + version + ")"
 };
 
@@ -384,6 +386,12 @@ function miseAJourPortefeuilleTemplate() {
               STORAGE
 **********************************/
 
+/** ----- SUPPRESSION TOUT LE LOCAL STORAGE ------ */
+function supprimerLocalStorage() {
+    storage = [];
+    localStorage.removeItem("achats_etfwallet");
+}
+
 /** ----- SUPPRESSION D'UNE DONNEE DU LOCAL STORAGE ------ */
 function supprimerDonneeStorage(index) {
     storage.forEach( (elmt, id) => {
@@ -439,15 +447,30 @@ function recupererObjetVignette(index) {
             INTERACTIONS
 **********************************/
 
+/** ----- AU CLIC SUR LE BOUTON RESET ------ */
+function clickReset() {
+    ouverturePopinSuppressionTotale();
+}
+
+/** ----- AU CLIC SUR L'ICONE PARAMETRES ------ */
+function clickParams() {
+    faireApparaitrePageParametres();
+}
+
 /** ----- AU CLIC SUR VALIDATION POPIN ------ */
 function clickOKPopin() {
     var valueIndex = document.getElementById('index-popin').value;
-    if(valueIndex !== 'version' && valueIndex !== 'maj') {
+    if (valueIndex !== 'version' && valueIndex !== 'maj' && valueIndex !== 'suppr') {
         supprimerDonneeStorage(valueIndex);
         detruirePopin();
         clickRetour();
-    }
-    else {
+    } else if (valueIndex === 'suppr') {
+        supprimerLocalStorage();
+        detruirePopin();
+        clickRetour();
+        miseAJourPortefeuille();
+        gestionAffichagePresentation();
+    } else {
         detruirePopin();
     }
 }
@@ -553,6 +576,13 @@ function clickRetourFormulaire() {
     faireDisparaitrePageFormulaire();
 }
 
+/**
+ * AU CLIC SUR RETOUR DES PARAMETRES (BOUTON <)
+ */
+ function clickRetourParametres() {
+    faireDisparaitrePageParametres();
+}
+
 /** ----- AU CLIC SUR UNE VIGNETTE ------ */
 function clickAccordeon(element) {
     var elmtsAccordeons = document.getElementsByClassName("accordeon-content");
@@ -652,12 +682,73 @@ function ouverturePopinSuppression(etf) {
     creationPopin(titre, corps);
 }
 
+//** -----OUVERTURE POPIN SUPPRESSION TOTALE----- */
+function ouverturePopinSuppressionTotale() {
+    document.getElementById('index-popin').value = 'suppr';
+    var titre = 'SUPPRESSION';
+    var corps = "Etes-vous sûr de vouloir supprimer toutes les données de l'application ?";
+    creationPopin(titre, corps);
+}
+
 //** -----OUVERTURE POPIN MAJ----- */
 function ouverturePopinMAJ(miseAJour) {
     document.getElementById('index-popin').value = 'maj';
     var titre = 'NOUVEAUTEES';
     var corps = miseAJour.texte;
     creationPopin(titre, corps);
+}
+
+//** -----OUVERTURE POPIN CONFIRMATION UPLOAD----- */
+function ouverturePopinConfirmationUpload(nomFichier) {
+    document.getElementById('index-popin').value = 'maj';
+    var titre = 'UPLOAD';
+    var corps = "Les données ont été sauvegardées dans le fichier " + nomFichier;
+    creationPopin(titre, corps);
+}
+
+//** -----OUVERTURE POPIN CONFIRMATION DOWNLOAD----- */
+function ouverturePopinConfirmationDownload() {
+    document.getElementById('index-popin').value = 'maj';
+    var titre = 'DOWNLOAD';
+    var corps = "Les données ont été importées dans l'application";
+    creationPopin(titre, corps);
+}
+
+//** -----OUVERTURE POPIN ERREUR DONNEES----- */
+function ouverturePopinErreurDonnees() {
+    document.getElementById('index-popin').value = 'maj';
+    var titre = 'ERREUR';
+    var corps = "Il n' a pas de donnée à enregistrer...";
+    creationPopin(titre, corps);
+}
+
+
+/**********************************
+             PARAMETRES
+**********************************/
+
+/**
+ * FAIT APPARAITRE LA PAGE DES PARAMETRES
+ */
+ function faireApparaitrePageParametres() {
+    var elmtContainer = document.getElementById('container_principal');
+    var elmtParamsConteneur = document.getElementById('params-container');
+
+    elmtContainer.classList.add('hide');
+    elmtParamsConteneur.classList.add('show');
+}
+
+/**
+ * FAIRE DISPARAITRE LA PAGE DES PARAMETRES
+ */
+ function faireDisparaitrePageParametres() {
+    var elmtContainer = document.getElementById('container_principal');
+    var elmtParamsConteneur = document.getElementById('params-container');
+
+    elmtContainer.classList.remove('hide');
+    elmtParamsConteneur.classList.remove('show');
+    miseAJourPortefeuille();
+    gestionAffichagePresentation();
 }
 
 
@@ -811,6 +902,64 @@ function viderFormulaire() {
         newElmt.setAttribute('value', etf);
         saisieETF.appendChild(newElmt);
     }
+}
+
+
+/**********************************
+              FICHIER
+**********************************/
+
+/** ----- SAUVEGARDE D'UN FICHIER AU FORMAT JSON ------ */
+function sauvegardeJSON() {
+    var fichierJSON = 'data:text/json;charset=utf-8,';
+    if (storage && storage.length !== 0) {
+        fichierJSON += JSON.stringify(storage);
+        uploadFichier(fichierJSON);
+    } else {
+        ouverturePopinErreurDonnees();
+    }
+}
+
+/** ----- ENREGISTREMENT DU FICHIER CSV SUR LE DEVICE ------ */
+function uploadFichier(fichier) {
+    var encodedUri = encodeURI(fichier);
+    var link = document.createElement("a");
+    var nomFichier = "etf_wallet.json";
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", nomFichier);
+    document.body.appendChild(link);
+    link.click();
+    ouverturePopinConfirmationUpload(nomFichier);
+}
+
+function rechercheFichier() {
+    var fileInput = document.querySelector( "#input-file" );
+    fileInput.click();
+}
+ 
+function readFichier(input) {
+    if (input.files && input.files[0]) {
+        let reader = new FileReader();
+        var obj_json = new Object();
+        reader.readAsBinaryString(input.files[0]);
+        reader.onload = function (e) {
+            obj_json.size = e.total;
+            obj_json.dataFile = e.target.result;
+            enregistrerDonneesFichier(obj_json.dataFile);
+        }
+    }
+}
+ 
+function enregistrerDonneesFichier(data){
+    var donneesFichier = JSON.parse(data);
+
+    if (donneesFichier && donneesFichier !== null && donneesFichier.length !== 0) {
+        supprimerLocalStorage();
+        donneesFichier.forEach(objet => {
+            ajoutLocalStorage(objet);
+        })
+        ouverturePopinConfirmationDownload();
+    }    
 }
 
 

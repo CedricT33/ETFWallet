@@ -250,7 +250,7 @@ nav {
     left: 7px;
 }
 
-#img-alert {
+#img-alert, #img-params {
     font-family: 'fontawesome';
     font-size: 30px;
     -webkit-tap-highlight-color: transparent;
@@ -265,6 +265,10 @@ nav {
 
 #img-alert:before {
     content: "\f071";
+}
+
+#img-params:before {
+    content: "\f013";
 }
 
 #ajout:after {
@@ -308,11 +312,11 @@ nav {
     top: -1000px;
 }
 
-#ajout-container {
+#ajout-container, #params-container {
     display: none;
 }
 
-#ajout-container.show {
+#ajout-container.show, #params-container.show {
     display: flex;
 }
 
@@ -324,7 +328,16 @@ nav {
     justify-content: space-around;
 }
 
-#formulaire_retour {
+#params_total {
+    display: flex;
+    min-height: 100vh;
+    min-width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#formulaire_retour, #parametre_retour {
     font-family: 'fontawesome';
     font-size: 30px;
     -webkit-tap-highlight-color: transparent;
@@ -332,12 +345,12 @@ nav {
     padding: 12px 25px;
 }
 
-#formulaire_retour:after {
+#formulaire_retour:after, #parametre_retour:after {
     content: "\f137";
     color: #5bb464;
 }
 
-#titre_formulaire {
+#titre_formulaire, #titre_parametres {
     font-size: 24px;
     background: linear-gradient(170deg, #95ea94 0%, #318c45 100%);
     -webkit-background-clip: text;
@@ -427,7 +440,7 @@ nav {
     text-align: center;
 }
 
-#btn-ok, #btn-popin {
+#btn-ok, #btn-popin, #btn-load, #btn-save, #btn-reset {
     font-family: 'spartan-black';
     font-size: 22px;
     transform: scaleY(0.9);
@@ -438,6 +451,15 @@ nav {
     text-decoration: none;
     margin-bottom: 70px;
     cursor: pointer;
+}
+
+#btn-save {
+    margin-top: 70px;
+}
+
+#input-file {
+    opacity: 0;
+    display: none;
 }
 
 
