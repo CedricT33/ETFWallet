@@ -33,7 +33,7 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.010";
+var version = "01.00.011";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
