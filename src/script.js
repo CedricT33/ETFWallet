@@ -33,11 +33,12 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.013";
+var version = "01.00.014";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
 var objetCoursETFJSON = new Object();
+var objetAchatsETF = new Object();
 var ExTotalETF = 0;
 var totalAchats = 0;
 var totalETFs = 0;
@@ -232,7 +233,7 @@ var ETFs = {
  * CONSTRUIT UNE VIGNETTE COURS
  */
 function constructionVignetteCoursHTML(etf_nom, etf_complet, cours, coursEuro) {
-    var achatTotalETF = objetTotalETF[etf_nom];
+    var achatTotalETF = objetAchatsETF[etf_nom];
     var quantiteTotalETF = objetQuantiteETF[etf_nom];
     var totalRentabiliteETF = ((coursEuro * quantiteTotalETF) - achatTotalETF) / achatTotalETF;
     var totalRentabiliteETFFormated = formatPrix(totalRentabiliteETF) + " %";
@@ -1132,20 +1133,24 @@ function miseAJourPortefeuille() {
     objetQuantiteETF = new Object();
     objetTotalETF = new Object();
     objetCoursETFJSON = new Object();
+    objetAchatsETF = new Object();
 
     if (storage) {
         storage.forEach( elmt => {
             totalAchats += elmt.total;
             if (Object.keys(objetQuantiteETF).indexOf(elmt.etf) !== -1) {
                 objetQuantiteETF[elmt.etf] += elmt.quantite;
+                objetAchatsETF[elmt.etf] += elmt.total;
             }
             else {
                 objetQuantiteETF[elmt.etf] = elmt.quantite;
+                objetAchatsETF[elmt.etf] = elmt.total;
             }
         })
     }
     console.log("totalAchats : ", totalAchats);
     console.log("objetQuantiteETF : ", objetQuantiteETF);
+    console.log("objetAchatsETF : ", objetAchatsETF);
 
     if (Object.keys(objetQuantiteETF).length !== 0) {
         recuperationCoursETFs(Object.keys(objetQuantiteETF)).then(function(reponse) {
