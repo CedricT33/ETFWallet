@@ -33,7 +33,7 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.011";
+var version = "01.00.012";
 var storage = [];
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
@@ -46,6 +46,7 @@ var miseAJour = {
     date: "15/01/2022",
     texte: "- Classement des achats par date.\n" +
            "- Ajout de l'enregistrement de données sur device.\n" +
+           "- Ajout de la rentabilité totale par ETF.\n" +
            "(Version : " + version + ")"
 };
 
