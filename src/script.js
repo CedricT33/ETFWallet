@@ -528,28 +528,14 @@ function clickAjout() {
  function clickGraph() {
     if (storage && storage.length !== 0 ) {
         var elemtDeco = document.getElementById('deco');
-        var elemtPortefeuille = document.getElementById('portefeuille');
-        var elemtBitcoin = document.getElementById('bitcoin');
-        var elemtBtnRetour = document.getElementById('retour');
-        var elemBtnGraph = document.getElementById('graph');
-        var elemtBtnAjout = document.getElementById('ajout');
-        var elemtCoursContainer = document.getElementById('cours_container');
-        var elemtAchatsContainer = document.getElementById('achats_container');
-        var elemtGraph = document.getElementById('graph_container');
         var elemtTitre = document.getElementById('titre_vignettes');
+        var idElmts = ['portefeuille', 'bitcoin', 'retour', 'graph', 'ajout', 'cours_container', 'achats_container', 'graph_container'];
 
         elemtDeco.classList.remove('wallet');
         elemtDeco.classList.add('stats');
-        elemtPortefeuille.classList.add('hide');
-        elemtBitcoin.classList.add('hide');
-        elemtBtnRetour.classList.remove('hide');
-        elemBtnGraph.classList.add('hide');
-        elemtBtnAjout.classList.add('hide');
-        elemtCoursContainer.classList.add('hide');
-        elemtAchatsContainer.classList.remove('hide');
-        elemtGraph.classList.remove('hide');
         elemtTitre.textContent = "Transactions";
         creationGraph();
+        FW.changementDePage(idElmts);
     }
     else {
         // TODO popin -> "Aucunes données" ?
@@ -561,31 +547,17 @@ function clickAjout() {
  */
  function clickRetour() {
     var elemtDeco = document.getElementById('deco');
-    var elemtPortefeuille = document.getElementById('portefeuille');
-    var elemtBitcoin = document.getElementById('bitcoin');
-    var elemtBtnRetour = document.getElementById('retour');
-    var elemtBtnGraph = document.getElementById('graph');
-    var elemtBtnAjout = document.getElementById('ajout');
-    var elemtCoursContainer = document.getElementById('cours_container');
     var elemtVignettesCours = document.getElementsByClassName('vignette_cours');
-    var elemtAchatsContainer = document.getElementById('achats_container');
-    var elemtGraph = document.getElementById('graph_container');
     var elemtTitre = document.getElementById('titre_vignettes');
+    var idElmts = ['portefeuille', 'bitcoin', 'retour', 'graph', 'ajout', 'cours_container', 'achats_container', 'graph_container'];
 
     elemtDeco.classList.remove('stats');
     elemtDeco.classList.add('wallet');
-    elemtPortefeuille.classList.remove('hide');
-    elemtBitcoin.classList.remove('hide');
-    elemtBtnRetour.classList.add('hide');
-    elemtBtnGraph.classList.remove('hide');
-    elemtBtnAjout.classList.remove('hide');
-    elemtCoursContainer.classList.remove('hide');
-    elemtAchatsContainer.classList.add('hide');
-    elemtGraph.classList.add('hide');
     for (const element of elemtVignettesCours) {
         element.classList.add('animation');
     }   
     elemtTitre.textContent = "Marchés";
+    FW.changementDePage(idElmts);
 }
 
 /**
@@ -750,22 +722,16 @@ function ouverturePopinErreurDonnees() {
  * FAIT APPARAITRE LA PAGE DES PARAMETRES
  */
  function faireApparaitrePageParametres() {
-    var elmtContainer = document.getElementById('container_principal');
-    var elmtParamsConteneur = document.getElementById('params-container');
-
-    elmtContainer.classList.add('hide');
-    elmtParamsConteneur.classList.add('show');
+    var listIds = ['container_principal', 'params-container'];
+    FW.changementDePage(listIds);
 }
 
 /**
  * FAIRE DISPARAITRE LA PAGE DES PARAMETRES
  */
  function faireDisparaitrePageParametres() {
-    var elmtContainer = document.getElementById('container_principal');
-    var elmtParamsConteneur = document.getElementById('params-container');
-
-    elmtContainer.classList.remove('hide');
-    elmtParamsConteneur.classList.remove('show');
+    var listIds = ['container_principal', 'params-container'];
+    FW.changementDePage(listIds);
     miseAJourPortefeuille();
     gestionAffichagePresentation();
 }
@@ -791,11 +757,8 @@ function remplirFormulaire(index) {
  * FAIT APPARAITRE LA PAGE D'AJOUT/MODIFICATION D'ACHAT
  */
  function faireApparaitrePageFormulaire() {
-    var elmtContainer = document.getElementById('container_principal');
-    var elmtAjoutConteneur = document.getElementById('ajout-container');
-
-    elmtContainer.classList.add('hide');
-    elmtAjoutConteneur.classList.add('show');
+    var listIds = ['container_principal', 'ajout-container'];
+    FW.changementDePage(listIds);
 
     logiqueFormulaire();
 }
@@ -866,11 +829,8 @@ function logiqueFormulaire() {
  * FAIRE DISPARAITRE LA PAGE D'AJOUT/MODIFICATION D'ACHAT
  */
 function faireDisparaitrePageFormulaire() {
-    var elmtContainer = document.getElementById('container_principal');
-    var elmtAjoutConteneur = document.getElementById('ajout-container');
-
-    elmtContainer.classList.remove('hide');
-    elmtAjoutConteneur.classList.remove('show');
+    var listIds = ['container_principal', 'ajout-container'];
+    FW.changementDePage(listIds);
     viderFormulaire();
 }
 
