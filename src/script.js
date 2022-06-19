@@ -4,6 +4,7 @@
 
 **** API
 **** CONSTANTES
+**** VARIABLES GLOBALES
 **** SW
 **** UTILS
 **** UTILS APPLI
@@ -33,8 +34,36 @@ var apiKey = "614381e909d510.28957559";
 /**********************************
             CONSTANTES
 **********************************/
-var version = "01.00.018";
+var init = {
+    version: "01.00.019",
+    profilInitial: {
+        id: 1,
+        nom: "PORTEFEUILLE",
+        transactions: []
+    },
+    miseAJour: {
+        date: "19/06/2022",
+        texte:  "- Remontée des labels du graphique.\n" +
+                "(Version : " + version + ")"
+    },
+    ETFs: {
+        CW8: 'MSCI World',
+        ESE: 'S&P 500',
+        PANX: 'Nasdaq 100',
+        PAASI: 'Emerging Asia',
+        RS2K: 'Russell 2000'
+    }
+}
+
+
+/**********************************
+        VARIABLES GLOBALES
+**********************************/
+
+var version = init.version;
 var storage = [];
+var profil = init.profilInitial;
+var profilSelected = 0;
 var objetQuantiteETF = new Object();
 var objetTotalETF = new Object();
 var objetCoursETFJSON = new Object();
@@ -42,20 +71,8 @@ var objetAchatsETF = new Object();
 var ExTotalETF = 0;
 var totalAchats = 0;
 var totalETFs = 0;
-
-var miseAJour = {
-    date: "19/06/2022",
-    texte: "- Remontée des labels du graphique.\n" +
-           "(Version : " + version + ")"
-};
-
-var ETFs = {
-    CW8: 'MSCI World',
-    ESE: 'S&P 500',
-    PANX: 'Nasdaq 100',
-    PAASI: 'Emerging Asia',
-    RS2K: 'Russell 2000'
-}
+var miseAJour = init.miseAJour;
+var ETFs = init.ETFs;
 
 
 /**********************************
@@ -106,11 +123,11 @@ var ETFs = {
  */
  function recupererIndexMax() {
     var tableauIndex = [];
-    if (!storage || storage.length === 0) {
+    if (!profil || profil.transactions.length === 0) {
         return 1;
     }
     else {
-        storage.forEach(elmt => {
+        profil.transactions.forEach(elmt => {
             tableauIndex.push(elmt.index);
         })
         return (Math.max(...tableauIndex) + 1);
@@ -151,14 +168,14 @@ var ETFs = {
  * TRI DU STORAGE PAR DATE (CROISSANT)
  */
  function triStorageParDate() {
-    if (storage) {
-        storage.forEach( (donnee) => {
+    if (profil) {
+        profil.transactions.forEach( (donnee) => {
             var dateString = "" + donnee.annee + "-" + donnee.mois + "-" + donnee.jour;
             var date = Date.parse(dateString);
             donnee.date = date;
         })
     }
-    storage.sort((a,b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0));
+    profil.transactions.sort((a,b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0));
 }
 
 
@@ -342,8 +359,8 @@ function ajoutVignettesHTMLCours(objetCoursETFs) {
  function ajoutVignettesHTMLAchats() {
     suppressionVignettesAchats();
     triStorageParDate();
-    if (storage) {
-        storage.forEach( (achat) => {
+    if (profil) {
+        profil.transactions.forEach( (achat) => {
             var date = "" + achat.jour + "/" + achat.mois + "/" + achat.annee;
             constructionVignetteAchatsHTML(achat.index, achat.etf, achat.quantite, achat.total, date);
         })
@@ -354,11 +371,14 @@ function ajoutVignettesHTMLCours(objetCoursETFs) {
  * MISE A JOUR DU PORTEFEUILLE DANS LE TEMPLATE AVEC ANIMATION
  */
 function miseAJourPortefeuilleTemplate() {
+    var elmtPortefeuilleNomProfil = document.getElementById('nom_profil');
     var elmtPortefeuilleTotal = document.getElementById('total');
     var elmtPortefeuilleGains = document.getElementById('gains-total');
     var elmtPortefeuillePoucentage = document.getElementById('pourcentage-total');
     var elmtPortefeuilleGainsJour = document.getElementById('gains-jour');
     var elmtPortefeuillePoucentageJour = document.getElementById('pourcentage-jour');
+
+    elmtPortefeuilleNomProfil.textContent = profil.nom;
 
     var gains = totalETFs - totalAchats;
     var pourcentage = ((totalETFs - totalAchats)*100)/totalAchats;
@@ -403,20 +423,33 @@ function miseAJourPortefeuilleTemplate() {
               STORAGE
 **********************************/
 
-/** ----- SUPPRESSION TOUT LE LOCAL STORAGE ------ */
+/**
+ * ENREGISTREMENT DU PROFIL ET AJOUT DANS LE LOCAL STORAGE 
+ */
+function ajoutLocalStorage() {
+    storage.forEach( (profilSorage, id) => {
+        if (profil.id === profilSorage.id) {
+            storage.splice(id, 1, profil);
+        }
+    });
+    localStorage.setItem("achats_etfwallet", JSON.stringify(storage));
+}
+
+/** ----- SUPPRESSION DE TOUT LE LOCAL STORAGE ------ */
 function supprimerLocalStorage() {
     storage = [];
     localStorage.removeItem("achats_etfwallet");
+    localStorage.removeItem("profil_selected_etfwallet");
 }
 
 /** ----- SUPPRESSION D'UNE DONNEE DU LOCAL STORAGE ------ */
 function supprimerDonneeStorage(index) {
-    storage.forEach( (elmt, id) => {
+    profil.transactions.forEach( (elmt, id) => {
         if (elmt.index == index) {
-            storage.splice(id, 1);
+            profil.transactions.splice(id, 1);
         }
-    })
-    localStorage.setItem("achats_etfwallet", JSON.stringify(storage));
+    });
+    ajoutLocalStorage();
     recuperationLocalStorage();
     miseAJourPortefeuille();
     gestionAffichagePresentation();
@@ -425,7 +458,7 @@ function supprimerDonneeStorage(index) {
 /** ----- RECUPERE L'OBJET DU LOCAL STORAGE AVEC L'INDEX ------ */
 function recupererObjetVignette(index) {
     var element = {};
-    storage.forEach(elmt => {
+    profil.transactions.forEach(elmt => {
         if (elmt.index == index) {
             element = elmt;
         }
@@ -436,20 +469,32 @@ function recupererObjetVignette(index) {
 /**
  * AJOUT DU NOUVEL ACHAT DANS LE LOCAL STORAGE
  */
- function ajoutLocalStorage(objetAchat) {
+ function ajoutAchatLocalStorage(objetAchat) {
     // suppression de la donnée si elle existe
-    if (storage) {
-        storage.forEach( (elmt, id) => {
-            if (elmt.index == objetAchat.index) {
-                storage.splice(id, 1);
+    profil.transactions.forEach( (elmt, id) => {
+        if (elmt.index == objetAchat.index) {
+            profil.transactions.splice(id, 1);
+        }
+    })
+    profil.transactions.push(objetAchat);
+    ajoutLocalStorage();
+}
+
+/**
+ * RECUPERE LE PROFIL DE DEPART
+ */
+ function recuperationProfil() {
+    profilSelected = JSON.parse(localStorage.getItem("profil_selected_etfwallet"));
+    if (profilSelected) {
+        storage.forEach(profilStorage => {
+            if (profilStorage.id === profilSelected) {
+                profil = profilStorage;
             }
         })
     }
     else {
-        storage = [];
+        profil = storage[0];
     }
-    storage.push(objetAchat);
-    localStorage.setItem("achats_etfwallet", JSON.stringify(storage));
 }
 
 /**
@@ -457,6 +502,23 @@ function recupererObjetVignette(index) {
  */
  function recuperationLocalStorage() {
     storage = JSON.parse(localStorage.getItem("achats_etfwallet"));
+    if (!storage) {
+        storage = [];
+        storage.push(profil);
+    }
+    majAncienneVersionStorage();
+    recuperationProfil();
+}
+
+/**
+ * MAJ STRUCTURE LOCALSTORAGE ANCIENNE VERSION (SANS PROFILS)
+ */
+function majAncienneVersionStorage() {
+    if (Object.keys(storage[0]).indexOf("nom") === -1) {
+        profil.transactions = storage;
+        storage = [];
+        storage.push(profil);
+    }
 }
 
 
@@ -477,16 +539,17 @@ function clickParams() {
 /** ----- AU CLIC SUR VALIDATION POPIN ------ */
 function clickOKPopin() {
     var valueIndex = document.getElementById('index-popin').value;
-    if (valueIndex !== 'version' && valueIndex !== 'maj' && valueIndex !== 'suppr') {
+    if (valueIndex !== 'version' && valueIndex !== 'maj' && valueIndex !== 'reset') {
         supprimerDonneeStorage(valueIndex);
         detruirePopin();
         clickRetour();
-    } else if (valueIndex === 'suppr') {
+    } else if (valueIndex === 'reset') {
         supprimerLocalStorage();
-        detruirePopin();
-        clickRetour();
+        remiseAZeroProfil();
         miseAJourPortefeuille();
         gestionAffichagePresentation();
+        detruirePopin();
+        gestionRetourApresReset();
     } else {
         detruirePopin();
     }
@@ -524,10 +587,10 @@ function clickAjout() {
  * AU CLIC SUR LE BOUTON GRAPH
  */
  function clickGraph() {
-    if (storage && storage.length !== 0 ) {
+    if (profil && profil.transactions.length !== 0 ) {
         var elemtDeco = document.getElementById('deco');
         var elemtTitre = document.getElementById('titre_vignettes');
-        var idElmts = ['portefeuille', 'bitcoin', 'retour', 'graph', 'ajout', 'cours_container', 'achats_container', 'graph_container'];
+        var idElmts = ['portefeuille-container', 'bitcoin', 'retour', 'graph', 'ajout', 'cours_container', 'achats_container', 'graph_container'];
 
         elemtDeco.classList.remove('wallet');
         elemtDeco.classList.add('stats');
@@ -547,7 +610,7 @@ function clickAjout() {
     var elemtDeco = document.getElementById('deco');
     var elemtVignettesCours = document.getElementsByClassName('vignette_cours');
     var elemtTitre = document.getElementById('titre_vignettes');
-    var idElmts = ['portefeuille', 'bitcoin', 'retour', 'graph', 'ajout', 'cours_container', 'achats_container', 'graph_container'];
+    var idElmts = ['portefeuille-container', 'bitcoin', 'retour', 'graph', 'ajout', 'cours_container', 'achats_container', 'graph_container'];
 
     elemtDeco.classList.remove('stats');
     elemtDeco.classList.add('wallet');
@@ -624,7 +687,7 @@ function clickOKFormulaire() {
     var controleOK = controleSaisie(objetAchat);
 
     if (controleOK) {
-        ajoutLocalStorage(objetAchat);
+        ajoutAchatLocalStorage(objetAchat);
         miseAJourPortefeuille();
         faireDisparaitrePageFormulaire();
         gestionAffichagePresentation();
@@ -673,7 +736,7 @@ function ouverturePopinSuppression(etf) {
 
 //** -----OUVERTURE POPIN SUPPRESSION TOTALE----- */
 function ouverturePopinSuppressionTotale() {
-    document.getElementById('index-popin').value = 'suppr';
+    document.getElementById('index-popin').value = 'reset';
     var titre = 'SUPPRESSION';
     var corps = "Etes-vous sûr de vouloir supprimer toutes les données de l'application ?";
     creationPopin(titre, corps);
@@ -732,6 +795,19 @@ function ouverturePopinErreurDonnees() {
     FW.changementDePage(listIds);
     miseAJourPortefeuille();
     gestionAffichagePresentation();
+}
+
+/**
+ * GESTION DU RETOUR APRES RESET
+ */
+function gestionRetourApresReset() {
+    var elmtGraph = document.getElementById('graph_container');
+
+    if (elmtGraph.classList.contains("show")) {
+        clickRetour();
+    }
+
+    faireDisparaitrePageParametres();
 }
 
 
@@ -886,17 +962,6 @@ function viderFormulaire() {
               FICHIER
 **********************************/
 
-/** ----- SAUVEGARDE D'UN FICHIER AU FORMAT JSON ------ */
-function sauvegardeJSON() {
-    var fichierJSON = 'data:text/json;charset=utf-8,';
-    if (storage && storage.length !== 0) {
-        fichierJSON += JSON.stringify(storage);
-        uploadFichier(fichierJSON);
-    } else {
-        ouverturePopinErreurDonnees();
-    }
-}
-
 /** ----- ENREGISTREMENT DU FICHIER CSV SUR LE DEVICE ------ */
 function uploadFichier(fichier) {
     var encodedUri = encodeURI(fichier);
@@ -907,6 +972,17 @@ function uploadFichier(fichier) {
     document.body.appendChild(link);
     link.click();
     ouverturePopinConfirmationUpload(nomFichier);
+}
+
+/** ----- SAUVEGARDE D'UN FICHIER AU FORMAT JSON ------ */
+function sauvegardeJSON() {
+    var fichierJSON = 'data:text/json;charset=utf-8,';
+    if (storage && storage.length !== 0) {
+        fichierJSON += JSON.stringify(storage);
+        uploadFichier(fichierJSON);
+    } else {
+        ouverturePopinErreurDonnees();
+    }
 }
 
 function rechercheFichier() {
@@ -932,9 +1008,9 @@ function enregistrerDonneesFichier(data){
 
     if (donneesFichier && donneesFichier !== null && donneesFichier.length !== 0) {
         supprimerLocalStorage();
-        donneesFichier.forEach(objet => {
-            ajoutLocalStorage(objet);
-        })
+        storage = donneesFichier;
+        profil = storage[0];
+        ajoutLocalStorage();
         ouverturePopinConfirmationDownload();
     }    
 }
@@ -990,7 +1066,7 @@ function gestionAffichagePresentation() {
     var elmtFleche = document.getElementById('fleche-presentation');
     var elmtPresentation = document.getElementById('presentation-container');
 
-    if (!storage || storage.length == 0) {
+    if (profil.transactions.length == 0) {
         elmtFleche.classList.remove('hide');
         elmtPresentation.classList.remove('hide');
     }
@@ -1081,10 +1157,22 @@ function recuperationCoursETFs(tableauETF) {
 }
 
 /**
- * MET A JOUR LE PORTEFEUILLE
+ * REMISE A ZERO DU PROFIL
  */
-function miseAJourPortefeuille() {
-    // remise à 0 des variables globales
+function remiseAZeroProfil() {
+    profil = {
+        id: 1,
+        nom: "PORTEFEUILLE",
+        transactions: []
+    };
+    storage = [];
+    storage.push(profil);
+}
+
+/**
+ * REMISE A ZERO DES VARIABLES GLOBALES
+ */
+function remiseAZeroVariablesGlobales() {
     ExTotalETF = totalETFs;
     totalAchats = 0;
     totalETFs = 0;
@@ -1092,9 +1180,17 @@ function miseAJourPortefeuille() {
     objetTotalETF = new Object();
     objetCoursETFJSON = new Object();
     objetAchatsETF = new Object();
+}
 
-    if (storage) {
-        storage.forEach( elmt => {
+/**
+ * MET A JOUR LE PORTEFEUILLE
+ */
+function miseAJourPortefeuille() {
+
+    remiseAZeroVariablesGlobales();
+
+    if (profil) {
+        profil.transactions.forEach( elmt => {
             totalAchats += elmt.total;
             if (Object.keys(objetQuantiteETF).indexOf(elmt.etf) !== -1) {
                 objetQuantiteETF[elmt.etf] += elmt.quantite;

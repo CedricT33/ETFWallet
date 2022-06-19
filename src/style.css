@@ -184,21 +184,32 @@ header {
     bottom: -125px;
 }
 
-#portefeuille {
+#portefeuille-container {
     color: #262c28;
-    font-family: 'spartan-bold';
     position: absolute;
-    padding-left: 20px;
     width: 83vw;
-    top: 23%;
-    left: 50%;
+    top: 18%;
+    left: 47%;
     transform: translate(-50%, 0%);
-    border-left: 3px solid;
     opacity: 1;
     transition: all 0.3s ease-out;
 }
 
-#portefeuille.hide {
+#nom_profil {
+    font-family: 'spartan-bold';
+    font-size: 24px;
+    color: #4b7a5a;
+    padding-bottom: 4px;
+    margin-left: -2px;
+}
+
+#portefeuille {
+    font-family: 'spartan-bold';
+    padding-left: 20px;
+    border-left: 3px solid;
+}
+
+#portefeuille-container.hide {
     opacity: 0;
 }
 
@@ -250,13 +261,17 @@ nav {
     left: 7px;
 }
 
-#img-alert, #img-params {
+#img-alert, #img-params, #img-profil {
     font-family: 'fontawesome';
     font-size: 30px;
     -webkit-tap-highlight-color: transparent;
     padding: 15px 20px;
     cursor: pointer;
     color: #262c28;
+}
+
+#img-alert {
+    color: #6b806f;
 }
 
 #img-alert.hide {
@@ -269,6 +284,10 @@ nav {
 
 #img-params:before {
     content: "\f013";
+}
+
+#img-profil:before {
+    content: "\f007";
 }
 
 #ajout:after {
