@@ -320,7 +320,7 @@
   .highcharts-data-label text, text.highcharts-data-label {
     font-size: 20px;
     font-family: 'spartan-black';
-    transform: scaleY(0.9);
+    transform: scaleY(0.9) translateY(-5px);
     fill: #2d332f;
   }
   
