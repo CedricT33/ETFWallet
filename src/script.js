@@ -35,7 +35,7 @@ var apiKey = "614381e909d510.28957559";
             CONSTANTES
 **********************************/
 var init = {
-    version: "01.00.019",
+    version: "01.00.020",
     profilInitial: {
         id: 1,
         nom: "PORTEFEUILLE",
