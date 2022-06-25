@@ -12,6 +12,8 @@
 **** STORAGE
 **** INTERACTIONS
 **** POPIN
+**** PROFILS
+**** PARAMETRES
 **** FORMULAIRE
 **** FICHIER
 **** FONCTIONS
@@ -30,20 +32,24 @@ var apiKey = "614381e909d510.28957559";
 // requetes max : 20/jour, 20/min
 // exemple : https://eodhistoricaldata.com/api/real-time/CW8.PA?api_token=614381e909d510.28957559&fmt=json&s=ESE.PA,PANX.PA,PAASI.PA,RS2K.PA
 
+/**********************************
+            VERSION
+**********************************/
+var version = "02.00.000";
+
 
 /**********************************
             CONSTANTES
 **********************************/
 var init = {
-    version: "01.00.020",
     profilInitial: {
         id: 1,
-        nom: "PORTEFEUILLE",
+        nom: "PORTEFEUILLE 1",
         transactions: []
     },
     miseAJour: {
-        date: "19/06/2022",
-        texte:  "- Remontée des labels du graphique.\n" +
+        date: "25/06/2022",
+        texte:  "- Ajout du multi-wallet !\n" +
                 "(Version : " + version + ")"
     },
     ETFs: {
@@ -60,7 +66,6 @@ var init = {
         VARIABLES GLOBALES
 **********************************/
 
-var version = init.version;
 var storage = [];
 var profil = init.profilInitial;
 var profilSelected = 0;
@@ -344,7 +349,7 @@ function ajoutVignettesHTMLCours(objetCoursETFs) {
 
     suppressionVignettesCours();
 
-    for (const etf in objetCoursETFs) {
+    for (const etf in objetQuantiteETF) {
         etf_nom = etf;
         etf_complet = ETFs[etf];
         cours = objetCoursETFs[etf].change_p;
@@ -424,6 +429,14 @@ function miseAJourPortefeuilleTemplate() {
 **********************************/
 
 /**
+ * AJOUT DANS LE LOCAL STORAGE DU PROFIL SELECTIONNE
+ */
+ function ajoutLocalStorageProfilSelected() {
+    var profilSelected = {id: profil.id}
+    localStorage.setItem("profil_selected_etfwallet", JSON.stringify(profilSelected));
+}
+
+/**
  * ENREGISTREMENT DU PROFIL ET AJOUT DANS LE LOCAL STORAGE 
  */
 function ajoutLocalStorage() {
@@ -433,6 +446,7 @@ function ajoutLocalStorage() {
         }
     });
     localStorage.setItem("achats_etfwallet", JSON.stringify(storage));
+    ajoutLocalStorageProfilSelected();
 }
 
 /** ----- SUPPRESSION DE TOUT LE LOCAL STORAGE ------ */
@@ -487,7 +501,7 @@ function recupererObjetVignette(index) {
     profilSelected = JSON.parse(localStorage.getItem("profil_selected_etfwallet"));
     if (profilSelected) {
         storage.forEach(profilStorage => {
-            if (profilStorage.id === profilSelected) {
+            if (profilStorage.id === profilSelected.id) {
                 profil = profilStorage;
             }
         })
@@ -536,10 +550,15 @@ function clickParams() {
     faireApparaitrePageParametres();
 }
 
+/** ----- AU CLIC SUR L'ICONE PROFILS ------ */
+function clickProfils() {
+    faireApparaitrePageProfils();
+}
+
 /** ----- AU CLIC SUR VALIDATION POPIN ------ */
 function clickOKPopin() {
     var valueIndex = document.getElementById('index-popin').value;
-    if (valueIndex !== 'version' && valueIndex !== 'maj' && valueIndex !== 'reset') {
+    if (valueIndex !== 'version' && valueIndex !== 'maj' && valueIndex !== 'reset' && !valueIndex.includes('supprWallet')) {
         supprimerDonneeStorage(valueIndex);
         detruirePopin();
         clickRetour();
@@ -550,6 +569,14 @@ function clickOKPopin() {
         gestionAffichagePresentation();
         detruirePopin();
         gestionRetourApresReset();
+    } else if (valueIndex.includes('supprWallet')) {
+        var index = valueIndex.split(':')[1];
+        profil = storage[0];
+        var storageIndex = storage.findIndex((wallet => wallet.id == index));
+        storage.splice(storageIndex, 1);
+        ajoutLocalStorage();
+        detruirePopin();
+        faireDisparaitrePageProfils();
     } else {
         detruirePopin();
     }
@@ -566,6 +593,14 @@ function clickSuppr(element) {
         }
     })
     ouverturePopinSuppression(etf);
+}
+
+/** ----- AU CLIC SUR SUPPRIMER UN PROFIL ------ */
+function clickSupprProfil() {
+    var index = document.getElementById('suppr-profil').getAttribute('index');
+    if (index != 1 && index != "NEW") {
+        ouverturePopinSuppressionWallet(index);
+    }
 }
 
 /** ----- AU CLIC SUR MODIFIER UNE VIGNETTE ------ */
@@ -635,6 +670,13 @@ function clickRetourFormulaire() {
     faireDisparaitrePageParametres();
 }
 
+/**
+ * AU CLIC SUR RETOUR DES PROFILS (BOUTON <)
+ */
+ function clickRetourProfils() {
+    faireDisparaitrePageProfils();
+}
+
 /** ----- AU CLIC SUR UNE VIGNETTE ------ */
 function clickAccordeon(element) {
     var elmtsAccordeons = document.getElementsByClassName("accordeon-content");
@@ -697,6 +739,45 @@ function clickOKFormulaire() {
     }
 }
 
+/**
+ * AU CLIC SUR OK DE LA PAGE PROFIL
+ */
+ function clickOKFormulaireProfil() {
+    var elmtModifNom = document.getElementById('modifNom').value.toUpperCase();
+    var elmtSaisieProfil = document.getElementById('saisieProfil').value;
+
+    // modification du nom du wallet
+    if (elmtSaisieProfil == profil.id && elmtModifNom !== profil.nom) {
+        profil.nom = elmtModifNom;
+        ajoutLocalStorage();
+    }
+
+    // ajout d'un nouveau wallet
+    if (elmtSaisieProfil === "NEW") {
+        var newId = storage.length + 1;
+        var newNom = elmtModifNom.includes("PORTEFEUILLE") ? "PORTEFEUILLE " + newId : elmtModifNom;
+        var isDejaNom = storage.find(wallet => { return wallet.nom === newNom});
+        newNom = isDejaNom ? newNom.concat(newId) : newNom;
+        var newProfil = {
+            id: newId,
+            nom: newNom,
+            transactions: []
+        };
+        storage.push(newProfil);
+        profil = newProfil;
+        ajoutLocalStorage();
+    }
+
+    //selection d'un autre wallet existant
+    if (elmtSaisieProfil !== "NEW" && elmtSaisieProfil != profil.id) {
+        var storageIndex = storage.findIndex((wallet => wallet.id == elmtSaisieProfil));
+        profil = storage[storageIndex];
+    }
+    
+    ajoutLocalStorageProfilSelected();
+    faireDisparaitrePageProfils();
+}
+
 /**********************************
                POPIN
 **********************************/
@@ -731,6 +812,15 @@ function creationPopin(titre, corps) {
 function ouverturePopinSuppression(etf) {
     var titre = 'SUPPRESSION';
     var corps = 'Etes-vous sûr de vouloir supprimer cette transaction de ' + etf + ' ?';
+    creationPopin(titre, corps);
+}
+
+//** -----OUVERTURE POPIN SUPPRESSION WALLET----- */
+function ouverturePopinSuppressionWallet(index) {
+    document.getElementById('index-popin').value = 'supprWallet:' + index;
+    var wallet = storage.find(wallet => { return wallet.id == index});
+    var titre = 'SUPPRESSION';
+    var corps = 'Etes-vous sûr de vouloir supprimer le wallet ' + wallet.nom + ' ?';
     creationPopin(titre, corps);
 }
 
@@ -774,6 +864,114 @@ function ouverturePopinErreurDonnees() {
     creationPopin(titre, corps);
 }
 
+/**********************************
+             PROFILS
+**********************************/
+
+/**
+ * FAIT APPARAITRE LA PAGE DES PROFILS
+ */
+ function faireApparaitrePageProfils() {
+    var listIds = ['container_principal', 'profil-container'];
+    remplirFormulaireProfil();
+    ajouterEcouteurProfils();
+    FW.changementDePage(listIds);
+}
+
+/**
+ * FAIT DISPARAITRE LA PAGE DES PROFILS
+ */
+ function faireDisparaitrePageProfils() {
+    var listIds = ['container_principal', 'profil-container'];
+    var elmtGraph = document.getElementById('graph_container');
+
+    if (elmtGraph.classList.contains("show")) {
+        clickRetour();
+    }
+
+    viderFormulaireProfil();
+    miseAJourPortefeuille();
+    gestionAffichagePresentation();
+    FW.changementDePage(listIds);
+}
+
+/**
+ * AJOUTE UN ECOUTEUR SUR LA SELECTION D'UN NOUVEAU PROFIL
+ */
+function ajouterEcouteurProfils() {
+    var elmtSaisieProfil = document.getElementById('saisieProfil');
+    var elmtSuprrProfil = document.getElementById('suppr-profil');
+
+    function showIconeSuppr() {
+        elmtSuprrProfil.classList.add('show');
+        elmtSuprrProfil.setAttribute("index", elmtSaisieProfil.value);
+    };
+
+    function hideIconeSuppr() {
+        elmtSuprrProfil.classList.remove('show');
+        elmtSuprrProfil.setAttribute("index", elmtSaisieProfil.value);
+    };
+
+    if (elmtSaisieProfil.value != 1) {
+        showIconeSuppr();
+    }
+    else {
+        hideIconeSuppr()
+    }
+
+    elmtSaisieProfil.onchange = event => {
+        if (elmtSaisieProfil.value != 1 && elmtSaisieProfil.value !== "NEW") {
+            showIconeSuppr();
+        }
+        else {
+            hideIconeSuppr();
+        }
+    }
+}
+
+/**
+ * REMPLIT LES CHAMPS DE LA PAGE DES PROFILS
+ */
+function remplirFormulaireProfil() {
+    var elmtModifNom = document.getElementById('modifNom');
+    var elmtSaisieProfil = document.getElementById('saisieProfil');
+    var elmtDefaultWallet = document.getElementById('defaultWallet');
+
+    elmtModifNom.value = profil.nom;
+    elmtDefaultWallet.value = profil.id;
+    elmtDefaultWallet.textContent = profil.nom;
+
+    if (storage && storage.length !== 0) {
+        storage.forEach(wallet => {
+            if (wallet.id !== profil.id) {
+                var newElmt = document.createElement('option');
+                newElmt.textContent = wallet.nom;
+                newElmt.setAttribute('value', wallet.id);
+                elmtSaisieProfil.appendChild(newElmt);
+            }
+        });
+    }
+
+    var newElmt = document.createElement('option');
+    newElmt.textContent = "AJOUTER UN WALLET";
+    newElmt.setAttribute('value', "NEW");
+    elmtSaisieProfil.appendChild(newElmt);
+}
+
+/**
+ * VIDE LES CHAMPS DE LA PAGE DES PROFILS
+ */
+ function viderFormulaireProfil() {
+    var elmtSaisieProfil = document.getElementById('saisieProfil');
+
+    [...elmtSaisieProfil.children].forEach(elmt => {
+        if (elmt.id !== "defaultWallet") {
+            elmtSaisieProfil.removeChild(elmt);
+        } 
+    })
+
+}
+
 
 /**********************************
              PARAMETRES
@@ -788,7 +986,7 @@ function ouverturePopinErreurDonnees() {
 }
 
 /**
- * FAIRE DISPARAITRE LA PAGE DES PARAMETRES
+ * FAIT DISPARAITRE LA PAGE DES PARAMETRES
  */
  function faireDisparaitrePageParametres() {
     var listIds = ['container_principal', 'params-container'];
@@ -1162,7 +1360,7 @@ function recuperationCoursETFs(tableauETF) {
 function remiseAZeroProfil() {
     profil = {
         id: 1,
-        nom: "PORTEFEUILLE",
+        nom: "PORTEFEUILLE 1",
         transactions: []
     };
     storage = [];
@@ -1207,7 +1405,7 @@ function miseAJourPortefeuille() {
     console.log("objetAchatsETF : ", objetAchatsETF);
 
     if (Object.keys(objetQuantiteETF).length !== 0) {
-        recuperationCoursETFs(Object.keys(objetQuantiteETF)).then(function(reponse) {
+        recuperationCoursETFs(Object.keys(ETFs)).then(function(reponse) {
             console.log("réponse de l'API : ", reponse);
             constructionObjetCoursETFJSON(reponse);
             calcultotalETFs(objetCoursETFJSON);

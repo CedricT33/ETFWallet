@@ -24,14 +24,14 @@
                     <a id="logo">ETF <span>wallet</span></a>
                     <a id="img-alert" class="hide"></a>                    
                     <div>
-                        <!-- <a id="img-profil" class=""></a> -->
+                        <a id="img-profil" onclick="clickProfils()"></a>
                         <a id="img-params" onclick="clickParams()"></a>
                     </div>
                 </header>
 
                 <!----- PORTEFEUILLE ----->
                 <div id="portefeuille-container">
-                    <div id="nom_profil">PORTEFEUILLE</div>
+                    <div id="nom_profil">-</div>
                     <div id="portefeuille">
                         <div id="total">0,00 €</div>
                         <div id="gains">
@@ -123,6 +123,32 @@
                 </form>
                 <div id="validation-container">
                     <button type="button" id="btn-ok" onclick="clickOKFormulaire()">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!----- PAGE PROFILS ---------------------------->
+        <div id="profil-container">
+            <header>
+                <div id="profil_retour" onclick="clickRetourProfils()"></div>
+                <div id="titre_profil">WALLET</div>
+            </header>
+            <div id="formulaire_total">
+                <form id="formulaire-container-profil">
+                    <div id="modif-nom-container">
+                        <label for="modifNom">Modifier le nom</label>
+                        <input id="modifNom" name="modifNom" maxlength="20">
+                    </div>
+                    <div id="modif-profil-container">
+                        <label for="profils">Changer de wallet</label>
+                        <select id="saisieProfil" name="profils">
+                            <option id="defaultWallet" value="" selected>WALLETS</option>
+                        </select>
+                        <div id="suppr-profil" class="img-suppr" onclick="clickSupprProfil(this)"></div>
+                    </div>
+                </form>
+                <div id="validation-container">
+                    <button type="button" id="btn-ok-profil" onclick="clickOKFormulaireProfil()">OK</button>
                 </div>
             </div>
         </div>
