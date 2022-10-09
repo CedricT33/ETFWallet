@@ -2,7 +2,7 @@
               BOUCHON 
 **********************************/
 
-function creationBouchon(urlAPI) {
+function creerBouchon(urlAPI, bodyAPI) {
     var bouchonComplet = []
     var bouchonCW8 = {
         "code": "CW8.PA",
