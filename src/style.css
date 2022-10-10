@@ -384,6 +384,7 @@ nav {
     font-size: 24px;
     background: linear-gradient(170deg, #95ea94 0%, #318c45 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     transform: scaleY(0.9);
     letter-spacing: 0.5px;
