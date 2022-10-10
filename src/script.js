@@ -24,7 +24,7 @@
                 API
 **********************************/
 /////////////////////
-const isBouchon = true;
+const isBouchon = false;
 /////////////////////
 
 const URL_API_BASE = "https://eodhistoricaldata.com/api/real-time/";
@@ -35,7 +35,7 @@ const API_KEY = "614381e909d510.28957559";
 /**********************************
             VERSION
 **********************************/
-const version = "02.00.000";
+const version = "02.00.001";
 
 
 /**********************************
@@ -48,8 +48,9 @@ const init = {
         transactions: []
     },
     miseAJour: {
-        date: "25/06/2022",
-        texte:  "- Ajout du multi-wallet !\n" +
+        date: "10/10/2022",
+        texte:  "- Ajout d'un loader !\n" +
+                "- Optimisation des appels\n" +
                 "(Version : " + version + ")"
     },
     ETFs: {
@@ -190,11 +191,10 @@ let ETFs = init.ETFs;
 
 /**
  * CALCUL LE TOTAL EN EUROS DE LA SOMME DES ETFS
- * @param objetCoursETFs la réponse de l'API des cours d'ETF en JSON (reconstruite)
  */
- function calculerTotalETFs(objetCoursETFs) {
+ function calculerTotalETFs() {
     for (const etf in objetQuantiteETF) {
-        objetTotalETF[etf] = objetCoursETFs[etf].close * objetQuantiteETF[etf];
+        objetTotalETF[etf] = objetCoursETFJSON[etf].close * objetQuantiteETF[etf];
     }
     util.loguer("objetTotalETF : ", objetTotalETF, isBouchon);
     for (const etf in objetTotalETF) {
@@ -339,9 +339,8 @@ function construireVignetteCoursHTML(etf_nom, etf_complet, cours, coursEuro) {
 
 /**
  * SUPPRESSION PUIS CREATION VIGNETTES COURS
- * @param objetCoursETFs la réponse de l'API des cours d'ETF en JSON (reconstruite)
  */
-function ajouterVignettesHTMLCours(objetCoursETFs) {
+function ajouterVignettesHTMLCours() {
     let etf_nom = '';
     let etf_complet = '';
     let cours = 0;
@@ -352,8 +351,8 @@ function ajouterVignettesHTMLCours(objetCoursETFs) {
     for (const etf in objetQuantiteETF) {
         etf_nom = etf;
         etf_complet = ETFs[etf];
-        cours = objetCoursETFs[etf].change_p;
-        coursEuro = objetCoursETFs[etf].close;
+        cours = objetCoursETFJSON[etf].change_p;
+        coursEuro = objetCoursETFJSON[etf].close;
         construireVignetteCoursHTML(etf_nom, etf_complet, cours, coursEuro);
     }
 }
@@ -525,7 +524,6 @@ function recupererObjetVignette(index) {
         storage = [];
         storage.push(profil);
     }
-    recupererProfil();
 }
 
 
@@ -1043,7 +1041,7 @@ function logiqueFormulaire() {
     const elmtCours = document.getElementById('saisieCours');
     const elmtCommission = document.getElementById('saisieCommission');
     const elmtTotal = document.getElementById('form_total');
-    const commission = 0;
+    let commission = 0;
 
     elmtCommission.value = 0.5;
 
@@ -1348,52 +1346,51 @@ function remiseAZeroVariablesGlobales() {
     totalETFs = 0;
     objetQuantiteETF = new Object();
     objetTotalETF = new Object();
-    objetCoursETFJSON = new Object();
     objetAchatsETF = new Object();
+}
+
+/**
+ * VALORISE LES VARIABLES GLOBALES POUR LE PROFIL SELECTIONNE
+ */
+ function valoriserVariablesGlobalesDuProfil() {
+    if (profil) {
+        profil.transactions.forEach( transaction => {
+            totalAchats += transaction.total;
+            if (Object.keys(objetQuantiteETF).indexOf(transaction.etf) !== -1) {
+                objetQuantiteETF[transaction.etf] += transaction.quantite;
+                objetAchatsETF[transaction.etf] += transaction.total;
+            }
+            else {
+                objetQuantiteETF[transaction.etf] = transaction.quantite;
+                objetAchatsETF[transaction.etf] = transaction.total;
+            }
+        })
+    }
+    util.loguer("totalAchats : ", totalAchats, isBouchon);
+    util.loguer("objetQuantiteETF : ", objetQuantiteETF, isBouchon);
+    util.loguer("objetAchatsETF : ", objetAchatsETF, isBouchon);
 }
 
 /**
  * MET A JOUR LE PORTEFEUILLE
  */
 function mettreAJourPortefeuille() {
-
     remiseAZeroVariablesGlobales();
-
-    if (profil) {
-        profil.transactions.forEach( elmt => {
-            totalAchats += elmt.total;
-            if (Object.keys(objetQuantiteETF).indexOf(elmt.etf) !== -1) {
-                objetQuantiteETF[elmt.etf] += elmt.quantite;
-                objetAchatsETF[elmt.etf] += elmt.total;
-            }
-            else {
-                objetQuantiteETF[elmt.etf] = elmt.quantite;
-                objetAchatsETF[elmt.etf] = elmt.total;
-            }
-        })
-    }
-    console.log("totalAchats : ", totalAchats);
-    console.log("objetQuantiteETF : ", objetQuantiteETF);
-    console.log("objetAchatsETF : ", objetAchatsETF);
-
+    valoriserVariablesGlobalesDuProfil();
     if (Object.keys(objetQuantiteETF).length !== 0) {
-        recuperationCoursETFs(Object.keys(ETFs)).then(function(reponse) {
-            console.log("réponse de l'API : ", reponse);
-            construireObjetCoursETFJSON(reponse);
-            calculerTotalETFs(objetCoursETFJSON);
-            mettreAJourPortefeuilleTemplate();
-            ajouterVignettesHTMLCours(objetCoursETFJSON);
-            ajouterVignettesHTMLAchats();
-        });
+        calculerTotalETFs();
+        mettreAJourPortefeuilleTemplate();
+        ajouterVignettesHTMLCours();
+        ajouterVignettesHTMLAchats();
     }
     else {
         mettreAJourPortefeuilleTemplate();
-        ajouterVignettesHTMLCours(objetCoursETFJSON);
+        ajouterVignettesHTMLCours();
     }
 }
 
 //** -----AFFICHE LES MAJ S'IL Y EN A----- */
-function gestionMiseAJour() {
+function afficherMisesAJour() {
     const miseAJourOld = JSON.parse(localStorage.getItem("maj_etfwallet"));
     if (miseAJourOld) {
         if(miseAJourOld.date !== miseAJour.date) {
@@ -1403,7 +1400,18 @@ function gestionMiseAJour() {
     }
     else {
         localStorage.setItem("maj_etfwallet", JSON.stringify(miseAJour));
+        ouverturePopinMAJ(miseAJour);
     }
+}
+
+/**
+ * INITIALISE LES VARIABLES, L'AFFICHAGE ET LE PROFIL
+ */
+function initialiserApplication() {
+    ajouterETFsFormulaire();
+    recupererLocalStorage();
+    recupererProfil();
+    gererAffichagePresentation();
 }
 
 
@@ -1415,11 +1423,16 @@ function gestionMiseAJour() {
  * LANCE LES FONCTIONS DE DEMARRAGE DE L'APP
  */
 function onDocumentReady() {
-    ajouterETFsFormulaire();
-    recupererLocalStorage();
-    gererAffichagePresentation();
-    mettreAJourPortefeuille();
-    gestionMiseAJour();
+    loader.show();
+    initialiserApplication();
+    recuperationCoursETFs(Object.keys(ETFs)).then( coursETF => {
+        util.loguer("Reponse API cours ETF : ", coursETF, isBouchon);
+        construireObjetCoursETFJSON(coursETF);
+        loader.hide();
+        util.afficherElement('container_principal');
+        mettreAJourPortefeuille();
+        afficherMisesAJour();
+    })
 }
 
 /** -----AU CHARGEMENT DU DOM----- */
