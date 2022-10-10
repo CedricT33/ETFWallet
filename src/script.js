@@ -1323,7 +1323,12 @@ function recuperationCoursETFs(tableauETF) {
             return resolve(reponse);
         }).catch(error => {
             util.afficherElement("img-alert");
-            return reject(error.message);
+            if (storageData) {
+                return resolve(storageData.data);
+            }
+            else {
+                return resolve(creerBouchonZero());
+            }
         })
     });
 }

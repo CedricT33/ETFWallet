@@ -87,3 +87,38 @@ function creerBouchon(urlAPI, bodyAPI) {
     }
     return bouchonComplet;
 }
+
+function creerBouchonZero() {
+    return [
+        {
+            "code": "CW8.PA",
+            "close": 0,
+            "previousClose": 0,
+            "change_p": 0
+        },
+        {
+            "code": "ESE.PA",
+            "close": 0,
+            "previousClose": 0,
+            "change_p": 0
+        },
+        {
+            "code": "PANX.PA",
+            "close": 0,
+            "previousClose": 0,
+            "change_p": 0
+        },
+        {
+            "code": "PAASI.PA",
+            "close": 0,
+            "previousClose": 0,
+            "change_p": 0
+        },
+        {
+            "code": "RS2K.PA",
+            "close": 0,
+            "previousClose": 0,
+            "change_p": 0
+        }
+    ]
+}
